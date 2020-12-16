@@ -7,73 +7,50 @@
 ///////////////////////////////////////////////////////////
 
 
+using System.Collections.Generic;
 
+namespace UNOServer.GameObjects {
 
-/// <summary>
-/// Игрок
-/// </summary>
-public class Player {
+	/// <summary>
+	/// Игрок
+	/// </summary>
+	public class Player {
 
-	public List<Card> Cards{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-	public string Name{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-	public int Position{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-	public Card m_Card;
+		public List<Card> Cards { get; set; }
+		public string Name { get;  set; }
+		public int Position { get; set; }
 
-	public Player(){
+		/// 
+		/// <param name="name"></param>
+		public Player(string name) {
+			Cards = new List<Card>();
+			Name = name;
+		}
 
-	}
+		/// 
+		/// <param name="card"></param>
+		public void addCard(Card card) {
 
-	~Player(){
+		}
 
-	}
+		/// 
+		/// <param name="index"></param>
+		public void getCard(int index) {
 
-	public virtual void Dispose(){
+		}
 
-	}
+		/// 
+		/// <param name="drawPile"></param>
+		/// <param name="currentTurn"></param>
+		public PlayerTurn PlayTurn(CardDeck drawPile, PlayerTurn currentTurn) {
 
-	/// 
-	/// <param name="name"></param>
-	public Player(string name){
+			return null;
+		}
 
-	}
+		public void removeCard() {
 
-	/// 
-	/// <param name="card"></param>
-	public void addCard(Card card){
+		}
 
-	}
+	}//end Player
 
-	/// 
-	/// <param name="index"></param>
-	public void getCard(int index){
-
-	}
-
-	/// 
-	/// <param name="drawPile"></param>
-	/// <param name="currentTurn"></param>
-	public PlayerTurn PlayTurn(CardDeck drawPile, PlayerTurn currentTurn){
-
-		return null;
-	}
-
-	public void removeCard(){
-
-	}
-
-}//end Player
+}

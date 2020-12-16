@@ -8,63 +8,40 @@
 
 
 
+using System.Collections.Generic;
 
-/// <summary>
-/// Колода карт
-/// </summary>
-public class CardDeck {
-	public List<Card> Cards{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-
-
-	public List<Card> Cards{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-
-
-
-	~CardDeck(){
-
-	}
-
-	public virtual void Dispose(){
-
-	}
-
-	public CardDeck(){
-
-	}
-
-	/// 
-	/// <param name="cards"></param>
-	public CardDeck(List<Card> cards){
-
-	}
-
-	/// 
-	/// <param name="count"></param>
-	public List<Card> Draw(int count){
-
-		return null;
-	}
-
-	public Card First(){
-
-		return null;
-	}
-
+namespace UNOServer.GameObjects {
 	/// <summary>
-	/// Перетасовует колоду карт
+	/// Колода карт
 	/// </summary>
-	public void Shuffle(){
+	public class CardDeck {
 
-	}
+		public List<Card> Cards { get; set; } 
 
-}//end CardDeck
+		public CardDeck() {
+
+		}
+
+		/// 
+		/// <param name="cards"></param>
+		public CardDeck(List<Card> cards) {
+			Cards = cards;
+		}
+
+		/// 
+		/// <param name="count"></param>
+		public List<Card> Draw(int count) {
+
+			return null;
+		}
+
+		/// <summary>
+		/// Перетасовует колоду карт
+		/// </summary>
+		public void Shuffle() {
+
+		}
+
+	}//end CardDeck
+
+}

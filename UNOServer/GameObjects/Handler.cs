@@ -7,46 +7,48 @@
 ///////////////////////////////////////////////////////////
 
 
+namespace UNOServer.GameObjects {
 
+	/// <summary>
+	/// Граничащий класс для взаимодействия с пользователем и контроллером игры.
+	/// </summary>
+	public class Handler {
 
-/// <summary>
-/// Граничащий класс для взаимодействия с пользователем и контроллером игры.
-/// </summary>
-public class Handler {
+		private Game game;
+		public Game m_Game;
 
-	private Game game;
-	public Game m_Game;
+		public Handler() {
 
-	public Handler(){
+		}
 
-	}
+		~Handler() {
 
-	~Handler(){
+		}
 
-	}
+		public virtual void Dispose() {
 
-	public virtual void Dispose(){
+		}
 
-	}
+		/// 
+		/// <param name="card"></param>
+		public void displayWrongCard(Card card) {
 
-	/// 
-	/// <param name="card"></param>
-	public void displayWrongCard(Card card){
+		}
 
-	}
+		/// 
+		/// <param name="index"></param>
+		public void playCard(int index) {
 
-	/// 
-	/// <param name="index"></param>
-	public void playCard(int index){
+		}
 
-	}
+		public void requestColor() {
 
-	public void requestColor(){
+		}
 
-	}
+		public void Start() {
 
-	public void Start(){
+		}
 
-	}
+	}//end Handler
 
-}//end Handler
+}

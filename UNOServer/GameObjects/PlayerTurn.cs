@@ -7,68 +7,20 @@
 ///////////////////////////////////////////////////////////
 
 
+namespace UNOServer.GameObjects {
 
-
-using enums;
-/// <summary>
-/// Класс, в котором будет хрнится предудщий ход.
-/// </summary>
-public class PlayerTurn {
-	public Card Card{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
 	/// <summary>
-	/// Используеся в основном для "Диких" карт
+	/// Класс, в котором будет хрнится предудщий ход.
 	/// </summary>
-	public CardColor DeclaredColor{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-	public TurnResult Result{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
+	public class PlayerTurn {
 
+		public Card Card { get; set; }
+		/// <summary>
+		/// Используеся в основном для "Диких" карт
+		/// </summary>
+		public CardColor DeclaredColor { get; set; }
+		public TurnResult Result { get; set; }
 
-	public Card Card{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-	/// <summary>
-	/// Используеся в основном для "Диких" карт
-	/// </summary>
-	public CardColor DeclaredColor{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-	public TurnResult Result{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
+	}//end PlayerTurn
 
-	public PlayerTurn(){
-
-	}
-
-	~PlayerTurn(){
-
-	}
-
-	public virtual void Dispose(){
-
-	}
-
-}//end PlayerTurn
+}

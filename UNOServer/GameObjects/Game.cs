@@ -7,74 +7,46 @@
 ///////////////////////////////////////////////////////////
 
 
+using System.Collections.Generic;
 
-
-/// <summary>
-/// Контроллер игры
-/// </summary>
-public class Game {
+namespace UNOServer.GameObjects {
 
 	/// <summary>
-	/// Колода карт
+	/// Контроллер игры
 	/// </summary>
-	public CardDeck deckCards{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-	/// <summary>
-	/// Список игроков
-	/// </summary>
-	public List<Player> Players{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-	/// <summary>
-	/// Колода сброса
-	/// </summary>
-	public List<Card> ThrowCards{
-		//read property
-		get{;}
-		//write property
-		set{;}
-	}
-	public Player m_Player;
-	public Handler m_Handler;
-	public CardDeck m_CardDeck;
+	public class Game {
 
-	public Game(){
+		/// <summary>
+		/// Колода карт
+		/// </summary>
+		public CardDeck deckCards { get; set;}
 
-	}
+		/// <summary>
+		/// Список игроков
+		/// </summary>
+		public List<Player> Players { get; set; }
 
-	~Game(){
+		/// <summary>
+		/// Колода сброса
+		/// </summary>
+		public List<Card> ThrowCards { get;  set; }
 
-	}
+		/// 
+		/// <param name="numberOfPlayers"></param>
+		public Game(int numberOfPlayers) {
 
-	public virtual void Dispose(){
+		}
 
-	}
+		/// 
+		/// <param name="turn"></param>
+		private void AddToDiscardPile(PlayerTurn turn) {
 
-	/// 
-	/// <param name="numberOfPlayers"></param>
-	public Game(int numberOfPlayers){
+		}
 
-	}
+		public void PlayGame() {
 
-	/// 
-	/// <param name="turn"></param>
-	private void AddToDiscardPile(PlayerTurn turn){
+		}
 
-	}
+	}//end Game
 
-	private void nextPlayer(){
-
-	}
-
-	public void PlayGame(){
-
-	}
-
-}//end Game
+}
