@@ -28,7 +28,7 @@ namespace UNOServer.ServerObjects {
         }
 
         protected internal void Play() {
-            game = new Game(clients.Count);
+            game = new Game(clients.Select(client => client.UserName).ToList());
             game.PlayGame();
         }
 

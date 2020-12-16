@@ -27,14 +27,17 @@ namespace UNOServer {
 
                 TcpClient tcpClient = tcpListener.AcceptTcpClient();
                 mainClient = new ClientObject(tcpClient, server);
-                //lobby.Add(mainClient);
-                Console.WriteLine("Подключен раздающий игрок");
+
+                string message = RecieveMessage(mainClient.Stream);
+
+                Console.WriteLine($"Подключен раздающий игрок: {message}");
+                mainClient.UserName = message;
 
                 new Thread(new ThreadStart(Listen)).Start();
 
                 while (true) {
                     try {
-                        string message = RecieveMessage(mainClient.Stream);
+                        message = RecieveMessage(mainClient.Stream);
 
                         if (message == "start") {
                             started = true;

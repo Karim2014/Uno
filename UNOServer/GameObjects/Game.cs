@@ -33,14 +33,16 @@ namespace UNOServer.GameObjects {
 
 		/// 
 		/// <param name="numberOfPlayers"></param>
-		public Game(int numberOfPlayers) {
+		public Game(List<string> players) {
 			Players = new List<Player>();
 			DeckCards = new CardDeck();
 			ThrowCards = new List<Card>();
 
-            for (int i = 0; i < numberOfPlayers; i++) {
-				Players.Add(new Player("noname " + i) { Position = i});
+            for (int i = 0; i < players.Count; i++) {
+				Players.Add(new Player(players[i]) { Position = i});
             }
+
+			players.ForEach(System.Console.WriteLine);
 		}
 
 		/// 
