@@ -9,12 +9,14 @@ using UNOServer.ServerObjects;
 namespace UNOServer {
     class Program {
 
+        static ServerObject server;
         static TcpListener tcpListener;
         static Thread waitThread;
         // главный клиент, который начинает игру
         static ClientObject mainClient;
         // список клиентов для подключения
-        static List<ClientObject> lobby = new List<ClientObject>();
+       
+        static bool started = false;
 
         static void Main(string[] args) {
             try {
@@ -22,69 +24,70 @@ namespace UNOServer {
                 tcpListener.Start();
                 Console.WriteLine("Сервер запущен. Ожидание подключений...");
 
+                server = new ServerObject();
+
                 TcpClient tcpClient = tcpListener.AcceptTcpClient();
-                mainClient = new ClientObject(tcpClient);
-                lobby.Add(mainClient);
+                mainClient = new ClientObject(tcpClient, server);
+                //lobby.Add(mainClient);
                 Console.WriteLine("Подключен раздающий игрок");
 
                 waitThread = new Thread(new ThreadStart(Listen));
                 waitThread.Start();
 
-                var stream = mainClient.Stream;
                 while (true) {
                     try {
-                        byte[] data = new byte[64]; // буфер для получаемых данных
-                        StringBuilder builder = new StringBuilder();
-                        int bytes = 0;
-                        do {
-                            bytes = stream.Read(data, 0, data.Length);
-                            builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                        }
-                        while (stream.DataAvailable);
+                        string message = RecieveMessage(mainClient.Stream);
 
-                        string message = builder.ToString();
-                        //Console.WriteLine(message);//вывод сообщения
                         if (message == "start") {
-                            waitThread.Abort();
+                            started = true;
                             Console.WriteLine("Игра началась");
                             break;
                         }
-                    } catch {
+
+                    } catch (Exception e){
                         Console.WriteLine("Подключение прервано!"); //соединение было прервано
                         Console.ReadLine();
-                        //Disconnect();
+                        Disconnect();
                     }
                 }
 
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
-                //Disconnect();
+                Disconnect();
             }
         }
 
         private static void Listen() {
-            while (true) {
-                var tcpClient = tcpListener.AcceptTcpClient();
-                lobby.Add(new ClientObject(tcpClient));
-                Console.WriteLine("Подключен игрок");
-                //ClientObject clientObject = new ClientObject(tcpClient, this);
-                //Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
-                //clientThread.Start();
+            while (!started) {
+                var tcpClient = new ClientObject(tcpListener.AcceptTcpClient(), server);
+                if (!started) {
+                    Thread clientThread = new Thread(new ThreadStart(tcpClient.Process));
+                    clientThread.Start();
+                }
             }
         }
 
-        static void RecieveMessage() {
+        static string RecieveMessage(NetworkStream stream) {
+            byte[] data = new byte[64]; // буфер для получаемых данных
+            StringBuilder builder = new StringBuilder();
+            int bytes = 0;
+            do {
+                bytes = stream.Read(data, 0, data.Length);
+                builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+            }
+            while (stream.DataAvailable);
 
+            return builder.ToString();
         }
 
         // отключение всех клиентов
-        //static void Disconnect() {
-        //    tcpListener.Stop(); //остановка сервера
-
+        static void Disconnect() {
+            tcpListener.Stop(); //остановка сервера
+            server.Disconnect();
         //    for (int i = 0; i < clients.Count; i++) {
         //        clients[i].Close(); //отключение клиента
         //    }
-        //    Environment.Exit(0); //завершение процесса
-        //}
+            //Environment.Exit(0); //завершение процесса
+        }
     }
 }

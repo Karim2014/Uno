@@ -24,11 +24,12 @@ namespace UNOServer.ServerObjects {
             client = tcpClient;
             server = serverObject;
             serverObject.AddConnection(this);
+            Stream = client.GetStream();
         }
 
         public void Process() {
             try {
-                Stream = client.GetStream();
+                
                 // получаем имя пользователя
                 string message = GetMessage();
                 userName = message;
