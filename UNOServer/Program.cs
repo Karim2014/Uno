@@ -31,7 +31,7 @@ namespace UNOServer {
                 string message = RecieveMessage(mainClient.Stream);
 
                 Console.WriteLine($"Подключен раздающий игрок: {message}");
-                mainClient.UserName = message;
+                mainClient.Player = new GameObjects.Player(message);
 
                 new Thread(new ThreadStart(Listen)).Start();
 

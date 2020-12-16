@@ -28,7 +28,7 @@ namespace UNOServer.ServerObjects {
         }
 
         protected internal void Play() {
-            game = new Game(clients.Select(client => client.UserName).ToList());
+            game = new Game(clients.Select(client => client.Player).ToList(), this);
             game.PlayGame();
         }
 
@@ -38,6 +38,14 @@ namespace UNOServer.ServerObjects {
             // и удаляем его из списка подключений
             if (client != null)
                 clients.Remove(client);
+        }
+
+        internal void TargetMessage(string message, Player player) {
+            ClientObject client = clients.FirstOrDefault(cl => cl.Player == player);
+            if (client != null) {
+                byte[] data = Encoding.Unicode.GetBytes(message);
+                client.Stream.Write(data, 0, data.Length);
+            }
         }
 
         // отключение всех клиентов

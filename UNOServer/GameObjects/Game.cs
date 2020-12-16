@@ -8,6 +8,7 @@
 
 
 using System.Collections.Generic;
+using UNOServer.ServerObjects;
 
 namespace UNOServer.GameObjects {
 
@@ -15,6 +16,8 @@ namespace UNOServer.GameObjects {
 	/// Контроллер игры
 	/// </summary>
 	public class Game {
+
+		ServerObject server;
 
 		/// <summary>
 		/// Колода карт
@@ -33,16 +36,19 @@ namespace UNOServer.GameObjects {
 
 		/// 
 		/// <param name="numberOfPlayers"></param>
-		public Game(List<string> players) {
-			Players = new List<Player>();
+		public Game(List<Player> players, ServerObject server) {
+			Players = players;
+			this.server = server;
 			DeckCards = new CardDeck();
 			ThrowCards = new List<Card>();
 
             for (int i = 0; i < players.Count; i++) {
-				Players.Add(new Player(players[i]) { Position = i});
+				Players[i].Position = i;
             }
 
 			players.ForEach(System.Console.WriteLine);
+
+			server.TargetMessage("1233", players[0]);
 		}
 
 		/// 

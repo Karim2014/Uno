@@ -9,7 +9,7 @@ namespace UNOServer.ServerObjects {
 
         protected internal string Id { get; private set; }
         protected internal NetworkStream Stream { get; private set; }
-        protected internal string UserName { get; set; }
+        protected internal Player Player { get; set; }
 
         private TcpClient client;
         private ServerObject server;
@@ -32,9 +32,9 @@ namespace UNOServer.ServerObjects {
                 
                 // получаем имя пользователя
                 string message = GetMessage();
-                UserName = message;
+                Player = new Player(message);
 
-                message = UserName + " подключился к игре";
+                message = Player.Name + " подключился к игре";
                 // посылаем сообщение о входе в чат всем подключенным пользователям
                 //server.BroadcastMessage(message, this.Id);
                 Console.WriteLine(message);
@@ -42,11 +42,11 @@ namespace UNOServer.ServerObjects {
                 while (true) {
                     try {
                         message = GetMessage();
-                        message = String.Format("{0}: {1}", UserName, message);
+                        message = String.Format("{0}: {1}", Player.Name, message);
                         Console.WriteLine(message);
                         server.BroadcastMessage(message, this.Id);
                     } catch {
-                        message = String.Format("{0}: покинул чат", UserName);
+                        message = String.Format("{0}: покинул чат", Player.Name);
                         Console.WriteLine(message);
                         server.BroadcastMessage(message, this.Id);
                         break;
