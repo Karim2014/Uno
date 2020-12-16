@@ -19,7 +19,7 @@ namespace UNOServer.GameObjects {
 		/// <summary>
 		/// Колода карт
 		/// </summary>
-		public CardDeck deckCards { get; set;}
+		public CardDeck DeckCards { get; set;}
 
 		/// <summary>
 		/// Список игроков
@@ -34,7 +34,13 @@ namespace UNOServer.GameObjects {
 		/// 
 		/// <param name="numberOfPlayers"></param>
 		public Game(int numberOfPlayers) {
+			Players = new List<Player>();
+			DeckCards = new CardDeck();
+			ThrowCards = new List<Card>();
 
+            for (int i = 0; i < numberOfPlayers; i++) {
+				Players.Add(new Player("noname " + i) { Position = i});
+            }
 		}
 
 		/// 
