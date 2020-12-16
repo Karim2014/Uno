@@ -8,6 +8,8 @@
 
 
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UNOServer.ServerObjects;
 
 namespace UNOServer.GameObjects {
@@ -46,10 +48,36 @@ namespace UNOServer.GameObjects {
 				Players[i].Position = i;
             }
 
-			players.ForEach(System.Console.WriteLine);
+			int maxCards = 7 * Players.Count;
+			int dealtCards = 0;
 
-			server.TargetMessage("1233", players[0]);
+			while (dealtCards < maxCards) {
+				Players.ForEach(pl => {
+					pl.Cards.Add(DeckCards.Cards.First());
+					DeckCards.Cards.RemoveAt(0);
+					dealtCards++;
+				});
+            }
+
+			ThrowCards.Add(DeckCards.Cards.First());
+			DeckCards.Cards.RemoveAt(0);
+
+			while (ThrowCards.First().Value == CardValue.Wild || ThrowCards.First().Value == CardValue.DrawFour) {
+				ThrowCards.Insert(0, DeckCards.Cards.First());
+				DeckCards.Cards.RemoveAt(0);
+			}
+
+			server.TargetMessage(PrepareCardsToSend(players[0]), players[0]);
 		}
+
+		private string PrepareCardsToSend(Player player) {
+			var stringCards = new StringBuilder();
+			stringCards.Append("cards:");
+			stringCards.Append(
+				string.Join(";", player.Cards.Select(card => $"{(int) card.Value}:{(int) card.Color}"))
+			);
+			return stringCards.ToString();
+        }
 
 		/// 
 		/// <param name="turn"></param>

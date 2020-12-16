@@ -22,7 +22,7 @@ namespace UNOServer {
                 tcpListener = new TcpListener(IPAddress.Any, 8888);
                 tcpListener.Start();
                 Console.WriteLine("Сервер запущен. Ожидание подключений...");
-
+ 
                 server = new ServerObject(tcpListener);
 
                 TcpClient tcpClient = tcpListener.AcceptTcpClient();
