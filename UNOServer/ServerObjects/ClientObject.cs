@@ -14,6 +14,11 @@ namespace UNOServer.ServerObjects {
         private TcpClient client;
         private ServerObject server;
 
+        public ClientObject(TcpClient tcpClient) {
+            Id = Guid.NewGuid().ToString();
+            client = tcpClient;
+        }
+
         public ClientObject(TcpClient tcpClient, ServerObject serverObject) {
             Id = Guid.NewGuid().ToString();
             client = tcpClient;
@@ -30,7 +35,7 @@ namespace UNOServer.ServerObjects {
 
                 message = userName + " подключился к игре";
                 // посылаем сообщение о входе в чат всем подключенным пользователям
-                server.BroadcastMessage(message, this.Id);
+                //server.BroadcastMessage(message, this.Id);
                 Console.WriteLine(message);
                 // в бесконечном цикле получаем сообщения от клиента
                 while (true) {
