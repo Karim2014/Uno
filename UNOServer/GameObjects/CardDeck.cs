@@ -8,6 +8,7 @@
 
 
 
+using System;
 using System.Collections.Generic;
 
 namespace UNOServer.GameObjects {
@@ -19,8 +20,58 @@ namespace UNOServer.GameObjects {
 		public List<Card> Cards { get; set; } 
 
 		public CardDeck() {
+			Cards = new List<Card>();
 
-		}
+            foreach (CardColor color in Enum.GetValues(typeof(CardColor))) {
+                if (color != CardColor.Wild) {
+                    foreach (CardValue val in Enum.GetValues(typeof(CardValue))) {
+                        switch (val) {
+                            case CardValue.One:
+                            case CardValue.Two:
+                            case CardValue.Three:
+                            case CardValue.Four:
+                            case CardValue.Five:
+                            case CardValue.Six:
+                            case CardValue.Seven:
+                            case CardValue.Eight:
+                            case CardValue.Nine:
+                            case CardValue.Skip:
+                            case CardValue.Reverse:
+                            case CardValue.DrawTwo:
+                                Cards.Add(new Card() {
+                                    Color = color,
+                                    Value = val
+                                });
+                                Cards.Add(new Card() {
+                                    Color = color,
+                                    Value = val
+                                });
+                                break;
+
+                            case CardValue.Zero:
+                                Cards.Add(new Card() {
+                                    Color = color,
+                                    Value = val
+                                });
+                                break;
+                        }
+                    }
+                } else {
+                    for (int i = 1; i <= 4; i++) {
+                        Cards.Add(new Card() {
+                            Color = color,
+                            Value = CardValue.Wild
+                        });
+                    }
+                    for (int i = 1; i <= 4; i++) {
+                        Cards.Add(new Card() {
+                            Color = color,
+                            Value = CardValue.DrawFour
+                        });
+                    }
+                }
+            }
+        }
 
 		/// 
 		/// <param name="cards"></param>
