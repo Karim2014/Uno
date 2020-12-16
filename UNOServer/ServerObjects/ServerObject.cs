@@ -34,13 +34,17 @@ namespace UNOServer.ServerObjects {
                     TcpClient tcpClient = tcpListener.AcceptTcpClient();
 
                     ClientObject clientObject = new ClientObject(tcpClient, this);
-                    Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
-                    clientThread.Start();
+                    //Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
+                    //clientThread.Start();
                 }
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
                 Disconnect();
             }
+        }
+
+        protected internal void Play() {
+
         }
 
         protected internal void RemoveConnection(string id) {
