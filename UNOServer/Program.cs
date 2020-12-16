@@ -11,7 +11,6 @@ namespace UNOServer {
 
         static ServerObject server;
         static TcpListener tcpListener;
-        static Thread waitThread;
         // главный клиент, который начинает игру
         static ClientObject mainClient;
         // список клиентов для подключения
@@ -24,15 +23,14 @@ namespace UNOServer {
                 tcpListener.Start();
                 Console.WriteLine("Сервер запущен. Ожидание подключений...");
 
-                server = new ServerObject();
+                server = new ServerObject(tcpListener);
 
                 TcpClient tcpClient = tcpListener.AcceptTcpClient();
                 mainClient = new ClientObject(tcpClient, server);
                 //lobby.Add(mainClient);
                 Console.WriteLine("Подключен раздающий игрок");
 
-                waitThread = new Thread(new ThreadStart(Listen));
-                waitThread.Start();
+                new Thread(new ThreadStart(Listen)).Start();
 
                 while (true) {
                     try {
@@ -41,6 +39,8 @@ namespace UNOServer {
                         if (message == "start") {
                             started = true;
                             Console.WriteLine("Игра началась");
+                            new Thread(new ThreadStart(server.Play)).Start();
+
                             break;
                         }
 
@@ -87,7 +87,7 @@ namespace UNOServer {
         //    for (int i = 0; i < clients.Count; i++) {
         //        clients[i].Close(); //отключение клиента
         //    }
-            //Environment.Exit(0); //завершение процесса
+            Environment.Exit(0); //завершение процесса
         }
     }
 }

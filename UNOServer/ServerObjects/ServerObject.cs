@@ -15,6 +15,10 @@ namespace UNOServer.ServerObjects {
         List<ClientObject> clients = new List<ClientObject>(); // все подключения
         Game game;
 
+        public ServerObject(TcpListener listener) {
+            tcpListener = listener;
+        }
+
         protected internal void AddConnection(ClientObject clientObject) {
             clients.Add(clientObject);
         }
@@ -23,28 +27,9 @@ namespace UNOServer.ServerObjects {
             throw new NotImplementedException();
         }
 
-        // прослушивание входящих подключений
-        protected internal void Listen() {
-            try {
-                tcpListener = new TcpListener(IPAddress.Any, 8888);
-                tcpListener.Start();
-                Console.WriteLine("Сервер запущен. Ожидание подключений...");
-
-                while (true) {
-                    TcpClient tcpClient = tcpListener.AcceptTcpClient();
-
-                    ClientObject clientObject = new ClientObject(tcpClient, this);
-                    //Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
-                    //clientThread.Start();
-                }
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-                Disconnect();
-            }
-        }
-
         protected internal void Play() {
-
+            game = new Game(clients.Count);
+            game.PlayGame();
         }
 
         protected internal void RemoveConnection(string id) {

@@ -50,7 +50,7 @@ namespace UNOServer.GameObjects {
 		}
 
 		public void PlayGame() {
-
+            System.Console.WriteLine("Играем в игрушечку");
 		}
 
 	}//end Game
