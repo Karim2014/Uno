@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace UNOServer.GameObjects {
 	/// <summary>
@@ -82,15 +83,24 @@ namespace UNOServer.GameObjects {
 		/// 
 		/// <param name="count"></param>
 		public List<Card> Draw(int count) {
-
-			return null;
+            var drawnCards = Cards.Take(count).ToList();
+            Cards.RemoveAll(card => drawnCards.Contains(card));
+			return drawnCards;
 		}
 
 		/// <summary>
 		/// Перетасовует колоду карт
 		/// </summary>
 		public void Shuffle() {
+            var random = new Random();
+            List<Card> cards = Cards;
 
+            for (int i = cards.Count - 1; i >= 0; i--) {
+                int k = random.Next(i + 1);
+                Card tmp = cards[i];
+                cards[i] = cards[k];
+                cards[k] = tmp;
+            }
 		}
 
 	}//end CardDeck
