@@ -28,10 +28,10 @@ namespace UNOServer.ServerObjects {
 
             // получаем имя пользователя
             string message = GetMessage();
-            Player = new Player(message) { Name = Id };
+            Player = new Player(message) { Id = Id };
             message = Player.Name + " подключился к игре";
             // посылаем сообщение о входе в чат всем подключенным пользователям
-            //server.BroadcastMessage(message, this.Id);
+            server.BroadcastMessage(message, this.Id);
             Console.WriteLine(message);
         }
 

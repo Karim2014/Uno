@@ -37,19 +37,14 @@ namespace UNOServer.GameObjects {
 			return $"Ваши карты: {string.Join(" ", Cards.Select(с => с.DisplayValue))}";
 		}
 
-		/// 
-		/// <param name="drawPile"></param>
-		/// <param name="currentTurn"></param>
+		/// <summary>
+		/// Выполняет ход
+		/// </summary>
+		/// <param name="drawPile">Основная колода карт</param>
+		/// <param name="previousTurn">Предыдущий ход</param>
 		public PlayerTurn PlayTurn(CardDeck drawPile, PlayerTurn previousTurn, ServerObject server) {
 			this.server = server;
-			string message = server.GetMessageFromPlayer("Ваш ход.\n:" + ShowCards(), this);
-
-			short index = -1;
-			Console.WriteLine("Player: " + message);
-			while(!Int16.TryParse(message, out index)) {
-				message = server.GetMessageFromPlayer(
-					"Выберите верный номер карты", this);
-			}
+			//string message = server.GetMessageFromPlayer("Ваш ход.\n:" + ShowCards(), this);
 
 			PlayerTurn turn = new PlayerTurn();
 			if (previousTurn.Result == TurnResult.Skip
@@ -57,16 +52,87 @@ namespace UNOServer.GameObjects {
 				|| previousTurn.Result == TurnResult.WildDrawFour) {
 				return ProcessAttack(previousTurn.Card, drawPile);
 
+			// если пред. рез. дикая карта или игрок пропустил ход и у него есть чем походить
 			} else if ((previousTurn.Result == TurnResult.WildCard
 						  || previousTurn.Result == TurnResult.Attacked
 						  || previousTurn.Result == TurnResult.ForceDraw)
 						  && HasMatch(previousTurn.DeclaredColor)) {
 				turn = PlayMatchingCard(previousTurn.DeclaredColor);
+
+			} else if (HasMatch(previousTurn.Card)) {
+				// если у нас есть карта, которой мы можем походить и предыдущий резльтат был обычным
+				// то обрабатываем как обычный ход
+				PlayMatchingCard(previousTurn.Card);
+            } else {
+				//уведомляем игрока, что о берет карты.
+				DrawCard(previousTurn, drawPile);
 			}
 
+			DisplayTurn(turn);
+
 			return turn;
-			;
 		}
+
+		// обрабатываем взятие из колоды карты
+		private PlayerTurn DrawCard(PlayerTurn prevTurn, CardDeck cardDeck) {
+
+			var turn = new PlayerTurn();
+			// берем одну карту
+			var drawnCard = cardDeck.Draw(1);
+			// добавляем игроку
+			Cards.AddRange(drawnCard);
+			server.GetMessageFromPlayer($"У вас нет карт, которые можно разыграть. Вам выдана карта из колоды: {drawnCard[0].Value}. \nНажмите Enter для продолжения ", this);
+			// если можно походить - предлагаем походить
+			if(HasMatch(prevTurn.Card)) {
+				turn = PlayMatchingCard(prevTurn.Card);
+				turn.Result = TurnResult.ForceDrawPlay;
+            } else {
+				turn.Result = TurnResult.ForceDraw;
+				turn.Card = prevTurn.Card;
+            }
+
+			return turn;
+        }
+
+		private void DisplayTurn(PlayerTurn currentTurn) {
+			if (currentTurn.Result == TurnResult.ForceDraw) {
+				Console.WriteLine($"{Name} вынужден взять карту. Он пропускает ход");
+				server.BroadcastMessage($"{Name} вынужден взять карту. Он пропускает ход", Id);
+				server.TargetMessage("Вы взяли карту, но она не может быть разыграна. \nВы пропускаете ход", this);
+            }
+
+			if(currentTurn.Result == TurnResult.ForceDrawPlay) {
+				Console.WriteLine($"{Name} вынужден взять и разграть карту из колоды.");
+				server.BroadcastMessage($"{Name} вынужден взять и разыграть карту из колоды. Он пропускает ход", Id);
+				server.TargetMessage("Вы взяли и разыграли карту из колоды", this);
+			}
+
+			if(currentTurn.Result == TurnResult.PlayedCard
+			   || currentTurn.Result == TurnResult.Skip
+			   || currentTurn.Result == TurnResult.DrawTwo
+			   || currentTurn.Result == TurnResult.WildCard
+			   || currentTurn.Result == TurnResult.WildDrawFour
+			   || currentTurn.Result == TurnResult.Reversed
+			   || currentTurn.Result == TurnResult.ForceDrawPlay) {
+
+				Console.WriteLine($"{Name} разыграл карту {currentTurn.Card.DisplayValue}");
+				server.BroadcastMessage($"{Name} разыграл карту {currentTurn.Card.DisplayValue}");
+				//server.TargetMessage("Вы взяли и разыграли карту из колоды", this);
+				if (currentTurn.Card.Color == CardColor.Wild) {
+					Console.WriteLine($"{Name} загадал {currentTurn.Card.Color} цвет");
+					server.BroadcastMessage($"{Name} загадал {currentTurn.Card.Color} цвет");
+				}
+				if (currentTurn.Card.Value == CardValue.Reverse) {
+					Console.WriteLine($"{Name} изменил направление");
+					server.BroadcastMessage($"{Name} изменил направление");
+				}
+			}
+
+			if (Cards.Count == 1) {
+				Console.WriteLine($"{Name} кричит UNO");
+				server.BroadcastMessage($"{Name} кричит UNO");
+			}
+		} 
 
         private PlayerTurn ProcessAttack(Card currentDiscard, CardDeck cardDeck) {
 			PlayerTurn turn = new PlayerTurn();
@@ -88,7 +154,7 @@ namespace UNOServer.GameObjects {
 
 			} else if (currentDiscard.Value == CardValue.DrawFour) {
 				Console.WriteLine("Игрок " + Name + " должен взять четыре карты и пропустить ход");
-				server.BroadcastMessage("Игрок " + Name + " должен взять четыре карты и пропустить ход");
+				server.BroadcastMessage("Игрок " + Name + " должен взять четыре карты и пропустить ход", Id);
 				server.TargetMessage("Вы берете четыре карты и пропускаете ход!", this);
 				Cards.AddRange(cardDeck.Draw(4));
 
@@ -123,38 +189,77 @@ namespace UNOServer.GameObjects {
 			return index;
 		}
 
-		private PlayerTurn PlayMatchingCard(CardColor color) {
+		private PlayerTurn PlayMatchingCard(List<Card> matching) {
 			var turn = new PlayerTurn();
 			turn.Result = TurnResult.PlayedCard;
-			var matching = Cards.Where(x => x.Color == color || x.Color == CardColor.Wild).ToList();
-
-			//если остались только дикие карты
-			if (matching.All(x => x.Value == CardValue.DrawFour)) {
-				// играем первой попавшеся
-				// TODO: Сдлеать уведомление игрока о том, что у него остались только дикие карты
-				turn.Card = matching.First();
-				// запрашиваем у игрока цвет карты, который он хочет
-				turn.DeclaredColor = (CardColor) RequestCardColor();
-				// резльтуат стаонвиться дикая карта на следующего игрока
-				turn.Result = TurnResult.WildCard;
-				// убираем эту карту из списка карт игрока
-				Cards.Remove(matching.First());
-
-				return turn;
-			}
-
-			// Запрашиваем номер карты у игрока
-			Card turnCard = Cards[RequestCardNumber()];
-			// ожидаем, что он выберет карту, которой можно походить
-			while (!matching.Contains(turnCard)) {
+			Card turnCard;
+			bool correct = false;
+			do {
+				// Запрашиваем номер карты у игрока
 				turnCard = Cards[RequestCardNumber()];
-            }
+				// ожидаем, что он выберет карту, которой можно походить
+				while(!matching.Contains(turnCard)) {
+					Console.WriteLine(Name + ": Вы не можете разыграть эту карту. Выберите другую");
+					server.TargetMessage("Вы не можете разыграть эту карту. Выберите другую", this);
+					turnCard = Cards[RequestCardNumber()];
+				}
+				// если это карта возьми четыре и она единственная, которой можно походить - ходим
+				if(turnCard.Value == CardValue.DrawFour && (matching.All(x => x.Value == CardValue.DrawFour))) {
+					// записываем карту в рузльтат
+					turn.Card = turnCard;
+					// цвет карты запрашиваем у игрока
+					turn.DeclaredColor = (CardColor)RequestCardColor();
+					// результат - дикая карта
+					turn.Result = TurnResult.WildDrawFour;
+					// убираем эту карту из списка карт игрока
+					Cards.Remove(turnCard);
+					// выходим из цикла
+					correct = true;
+				} else {
+					Console.WriteLine(Name + ": Эта карта может быть разыграна только когда у вас нет других карт, которые можно разыграть");
+					server.TargetMessage("Эта карта может быть разыграна только когда у вас нет других карт, которые можно разыграть", this);
+					continue;
+				}
+				// если разыгранная карта - дикая
+				if(turnCard.Value == CardValue.Wild) {
+					// записываем карту в результат
+					turn.Card = turnCard;
+					// запрашиваем цвет у игрока
+					turn.DeclaredColor = (CardColor)RequestCardColor();
+					// результат записываем как выбрана дикая карта
+					turn.Result = TurnResult.WildCard;
+					// убираем эту карту из списка карт игрока
+					Cards.Remove(turnCard);
+					correct = true;
+					// при обычной карте просто записываем все в параметры и работаем далее
+				} else {
+					turn.Card = turnCard;
+					turn.DeclaredColor = turnCard.Color;
+					Cards.Remove(turnCard);
+					correct = true;
+				}
 
-			turn.Card = turnCard;
-			turn.DeclaredColor = turnCard.Color;
+			} while(!correct);
 
 			return turn;
+		}
+
+		private PlayerTurn PlayMatchingCard(CardColor color) {
+			// определяем карты, которыми игрок может походить
+			var matching = Cards.Where(x => x.Color == color || x.Color == CardColor.Wild).ToList();
+			// запрашиваем у игрока карту и возращаем в виде хода
+			return PlayMatchingCard(matching);
         }
+
+		private PlayerTurn PlayMatchingCard(Card card) {
+			// определяем карты, которыми игрок может походить
+			var matching = Cards.Where(x => x.Color == card.Color || 
+										x.Color == CardColor.Wild ||
+										x.Value == card.Value
+										).ToList();
+			// запрашиваем у игрока карту и возращаем в виде хода
+			return PlayMatchingCard(matching);
+		}
 
 		private bool HasMatch(CardColor color) {
 			return Cards.Any(x => x.Color == color || x.Color == CardColor.Wild);

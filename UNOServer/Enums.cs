@@ -92,7 +92,7 @@ namespace UNOServer {
 		/// Игрок вынужден взять карту потому что у него нет подходящей карты, но вытянутую
 		/// карту можно разыграть
 		/// </summary>
-		ForceDrawPLay,
+		ForceDrawPlay,
 		/// <summary>
 		/// Обычная дикая карта
 		/// </summary>
