@@ -23,6 +23,11 @@ namespace UNOServer.ServerObjects {
             clients.Add(clientObject);
         }
 
+        protected internal void BroadcastMessage(string message) {
+            byte[] data = Encoding.Unicode.GetBytes(message);
+            clients.ForEach(client => client.Stream.Write(data, 0, data.Length));
+        }
+
         internal void BroadcastMessage(string message, string id) {
             throw new NotImplementedException();
         }

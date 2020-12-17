@@ -20,12 +20,11 @@ namespace UnoClient {
                 stream = client.GetStream(); // получаем поток
 
                 string message = userName;
-                byte[] data = Encoding.Unicode.GetBytes(message);
-                stream.Write(data, 0, data.Length);
+                Send(message);
 
                 // запускаем новый поток для получения данных
-                Thread receiveThread = new Thread(new ThreadStart(ReceiveMessage));
-                receiveThread.Start(); //старт потока
+                new Thread(new ThreadStart(ReceiveMessage)).Start();
+           
                 Console.WriteLine("Добро пожаловать, {0}", userName);
                 SendMessage();
             } catch (Exception ex) {
@@ -40,32 +39,60 @@ namespace UnoClient {
 
             while (true) {
                 string message = Console.ReadLine();
-                byte[] data = Encoding.Unicode.GetBytes(message);
-                stream.Write(data, 0, data.Length);
+                Send(message);
             }
         }
+
+        private static void Send(string message) {
+            byte[] data = Encoding.Unicode.GetBytes(message);
+            stream.Write(data, 0, data.Length);
+        }
+
         // получение сообщений
         static void ReceiveMessage() {
             while (true) {
                 try {
-                    byte[] data = new byte[64]; // буфер для получаемых данных
-                    StringBuilder builder = new StringBuilder();
-                    int bytes = 0;
-                    do {
-                        bytes = stream.Read(data, 0, data.Length);
-                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                    }
-                    while (stream.DataAvailable);
-
-                    string message = builder.ToString();
-                    Console.WriteLine(message);//вывод сообщения
-                } catch {
+                    string message = GetMessage();
+                    string[] m = message.Split(':');
+                    Console.WriteLine(message);
+                    Console.WriteLine($"head: <{m[0]}> body: <{m[1]}>");
+                    ProcessMessage(m[0], m[1]);
+                    
+                } catch(Exception e) {
                     Console.WriteLine("Подключение прервано!"); //соединение было прервано
+                    Console.WriteLine(e.Message);
                     Console.ReadLine();
                     Disconnect();
                 }
             }
         }
+
+
+
+        static string GetMessage() {
+            byte[] data = new byte[64]; // буфер для получаемых данных
+            StringBuilder builder = new StringBuilder();
+            do {
+                int bytes = stream.Read(data, 0, data.Length);
+                builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+            }
+            while (stream.DataAvailable);
+
+            return builder.ToString();
+        }
+
+        static void ProcessMessage(string head, string body) {
+            switch (head) {
+                case "text":
+                    Console.WriteLine(body);
+                    return;
+                case "cards":
+                    Console.WriteLine(body);
+                    return;
+            }
+        }
+
+        
 
         static void Disconnect() {
             if (stream != null)

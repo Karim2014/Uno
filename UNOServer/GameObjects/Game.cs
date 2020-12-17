@@ -44,6 +44,8 @@ namespace UNOServer.GameObjects {
 			DeckCards = new CardDeck();
 			ThrowCards = new List<Card>();
 
+			DeckCards.Shuffle();
+
             for (int i = 0; i < players.Count; i++) {
 				Players[i].Position = i;
             }
@@ -67,14 +69,14 @@ namespace UNOServer.GameObjects {
 				DeckCards.Cards.RemoveAt(0);
 			}
 
-			server.TargetMessage(PrepareCardsToSend(players[0]), players[0]);
+			Players.ForEach(player => server.TargetMessage(PrepareCardsToSend(player), player));
 		}
 
 		private string PrepareCardsToSend(Player player) {
 			var stringCards = new StringBuilder();
 			stringCards.Append("cards:");
 			stringCards.Append(
-				string.Join(";", player.Cards.Select(card => $"{(int) card.Value}:{(int) card.Color}"))
+				string.Join(";", player.Cards.Select(card => $"{(int) card.Value},{(int) card.Color}"))
 			);
 			return stringCards.ToString();
         }
@@ -87,6 +89,16 @@ namespace UNOServer.GameObjects {
 
 		public void PlayGame() {
             System.Console.WriteLine("Играем в игрушечку");
+			int i = 0;
+			bool isAscending = true;
+
+			PlayerTurn currentTurn = new PlayerTurn() {
+				Result = TurnResult.GameStart,
+				Card = ThrowCards.First(),
+				DeclaredColor = ThrowCards.First().Color
+			};
+
+			server.BroadcastMessage($"text:Первая карта {currentTurn.Card.DisplayValue}.");
 		}
 
 	}//end Game
