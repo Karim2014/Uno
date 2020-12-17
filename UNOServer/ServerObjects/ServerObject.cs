@@ -45,12 +45,25 @@ namespace UNOServer.ServerObjects {
                 clients.Remove(client);
         }
 
-        internal void TargetMessage(string message, Player player) {
+        protected internal string GetMessageFromPlayer(string message, Player player) {
             ClientObject client = clients.FirstOrDefault(cl => cl.Player == player);
+            if (client != null) {
+                TargetMessage("cmd^" + message, client);
+                return client.GetMessage();
+            }
+            return null;
+        }
+
+        protected internal void TargetMessage(string message, ClientObject client) {
             if (client != null) {
                 byte[] data = Encoding.Unicode.GetBytes(message);
                 client.Stream.Write(data, 0, data.Length);
             }
+        }
+
+        internal void TargetMessage(string message, Player player) {
+            ClientObject client = clients.FirstOrDefault(cl => cl.Player == player);
+            TargetMessage(message, client);
         }
 
         // отключение всех клиентов

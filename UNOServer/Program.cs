@@ -17,7 +17,7 @@ namespace UNOServer {
        
         static bool started = false;
 
-        static void Main(string[] args) {
+        static void Main(string[] args) {           
             try {
                 tcpListener = new TcpListener(IPAddress.Any, 8888);
                 tcpListener.Start();
@@ -25,47 +25,36 @@ namespace UNOServer {
  
                 server = new ServerObject(tcpListener);
 
-                TcpClient tcpClient = tcpListener.AcceptTcpClient();
-                mainClient = new ClientObject(tcpClient, server);
+                //TcpClient tcpClient = tcpListener.AcceptTcpClient();
+                //mainClient = new ClientObject(tcpClient, server);
 
-                string message = RecieveMessage(mainClient.Stream);
-
-                Console.WriteLine($"Подключен раздающий игрок: {message}");
-                mainClient.Player = new GameObjects.Player(message);
+                //Console.WriteLine($"Подключен раздающий игрок: {mainClient.Player.Name}");
+                //mainClient.Player = new GameObjects.Player(message);
 
                 new Thread(new ThreadStart(Listen)).Start();
 
-                while (true) {
-                    try {
-                        message = RecieveMessage(mainClient.Stream);
-
-                        if (message == "start") {
-                            started = true;
-                            Console.WriteLine("Игра началась");
-                            new Thread(new ThreadStart(server.Play)).Start();
-
-                            break;
-                        }
-
-                    } catch (Exception e){
-                        Console.WriteLine("Подключение прервано!"); //соединение было прервано
-                        Console.ReadLine();
-                        Disconnect();
-                    }
-                }
+                //while (!started) {
+                //    string message = RecieveMessage(mainClient.Stream);
+                //    started = message == "start";
+                //}
+                Console.ReadLine();
+                Console.WriteLine("Игра началась");
+                server.Play();
 
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("Подключение прервано!"); //соединение было прервано
+                Console.ReadLine();
                 Disconnect();
             }
         }
 
         private static void Listen() {
             while (!started) {
-                var tcpClient = new ClientObject(tcpListener.AcceptTcpClient(), server);
+                var tcpClient = tcpListener.AcceptTcpClient();  
                 if (!started) {
-                    Thread clientThread = new Thread(new ThreadStart(tcpClient.Process));
-                    clientThread.Start();
+                    var client = new ClientObject(tcpClient, server);
+                    //Thread clientThread = new Thread(new ThreadStart(client.Process));
+                    //clientThread.Start();
                 }
             }
         }

@@ -8,7 +8,7 @@ namespace UnoClient {
             Console.Write("Введите свое имя: ");
             string name = Console.ReadLine();
             var client = new Client(name);
-
+            client.Play();
         }
     }
 }

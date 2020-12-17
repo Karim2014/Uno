@@ -25,30 +25,33 @@ namespace UNOServer.ServerObjects {
             server = serverObject;
             serverObject.AddConnection(this);
             Stream = client.GetStream();
+
+            // получаем имя пользователя
+            string message = GetMessage();
+            Player = new Player(message);
+            message = Player.Name + " подключился к игре";
+            // посылаем сообщение о входе в чат всем подключенным пользователям
+            //server.BroadcastMessage(message, this.Id);
+            Console.WriteLine(message);
         }
 
         public void Process() {
             try {
-                
-                // получаем имя пользователя
-                string message = GetMessage();
-                Player = new Player(message);
 
-                message = Player.Name + " подключился к игре";
-                // посылаем сообщение о входе в чат всем подключенным пользователям
-                //server.BroadcastMessage(message, this.Id);
-                Console.WriteLine(message);
+
+                string message;
+                
                 // в бесконечном цикле получаем сообщения от клиента
                 while (true) {
                     try {
                         message = GetMessage();
                         message = String.Format("{0}: {1}", Player.Name, message);
                         Console.WriteLine(message);
-                        server.BroadcastMessage(message, this.Id);
+                        //server.BroadcastMessage(message, this.Id);
                     } catch {
                         message = String.Format("{0}: покинул чат", Player.Name);
                         Console.WriteLine(message);
-                        server.BroadcastMessage(message, this.Id);
+                        //server.BroadcastMessage(message, this.Id);
                         break;
                     }
                 }
@@ -62,7 +65,7 @@ namespace UNOServer.ServerObjects {
         }
 
         // чтение входящего сообщения и преобразование в строку
-        private string GetMessage() {
+        public string GetMessage() {
             byte[] data = new byte[64]; // буфер для получаемых данных
             StringBuilder builder = new StringBuilder();
             int bytes = 0;

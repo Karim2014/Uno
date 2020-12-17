@@ -14,6 +14,8 @@ namespace UnoClient {
         private TcpClient client;
         private NetworkStream stream;
 
+        Thread SendThread;
+
         public Client(string name) {
             userName = name;
             client = new TcpClient();
@@ -26,15 +28,14 @@ namespace UnoClient {
                 Send(message);
 
                 // запускаем новый поток для получения данных
-                new Thread(new ThreadStart(ReceiveMessage)).Start();
+                SendThread = new Thread(new ThreadStart(SendMessage));
+                SendThread.Start();
 
                 Console.WriteLine("Добро пожаловать, {0}", userName);
-                SendMessage();
+                //SendMessage();
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
-            } finally {
-                Disconnect();
-            }
+            } 
         }
 
         // отправка сообщений
@@ -53,15 +54,15 @@ namespace UnoClient {
         }
 
         // получение сообщений
-        private void ReceiveMessage() {
+        public void Play() {
             while (true) {
                 try {
                     string message = GetMessage();
-                    string[] m = message.Split(':');
+                    string[] m = message.Split('^', 2);
+                    string head = m[0];
+                    string body = m.Length > 1 ? m[1] : m[0];
                     Console.WriteLine(message);
-                    Console.WriteLine($"head: <{m[0]}> body: <{m[1]}>");
-                    ProcessMessage(m[0], m[1]);
-
+                    ProcessMessage(head, body);
                 } catch (Exception e) {
                     Console.WriteLine("Подключение прервано!"); //соединение было прервано
                     Console.WriteLine(e.Message);
@@ -91,7 +92,20 @@ namespace UnoClient {
                 case "cards":
                     Console.WriteLine(body);
                     return;
+                case "cmd":
+                    Console.WriteLine(body);
+                    string num = Console.ReadLine();
+                    Send(num);
+                    return;
+                default:
+                    Console.WriteLine(body);
+                    return;
             }
+        }
+
+        ~Client() {
+            Console.Beep();
+            Disconnect();
         }
 
         private void Disconnect() {
@@ -99,7 +113,7 @@ namespace UnoClient {
                 stream.Close();//отключение потока
             if (client != null)
                 client.Close();//отключение клиента
-            Environment.Exit(0); //завершение процесса
+            //Environment.Exit(0); //завершение процесса
         }
 
     }

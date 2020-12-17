@@ -7,7 +7,10 @@
 ///////////////////////////////////////////////////////////
 
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using UNOServer.ServerObjects;
 
 namespace UNOServer.GameObjects {
 
@@ -42,8 +45,21 @@ namespace UNOServer.GameObjects {
 		/// 
 		/// <param name="drawPile"></param>
 		/// <param name="currentTurn"></param>
-		public PlayerTurn PlayTurn(CardDeck drawPile, PlayerTurn currentTurn) {
+		public PlayerTurn PlayTurn(CardDeck drawPile, PlayerTurn currentTurn, ServerObject server) {
+			//server.TargetMessage($"cmd^Ваш ход. Выберите карту.\nВаши карты: {string.Join(" ", Cards.Select(с => с.DisplayValue))}", this);
+			string message = server.GetMessageFromPlayer(
+				$"Ваш ход. Выберите карту.\nВаши карты: {string.Join(" ", Cards.Select(с => с.DisplayValue))}", 
+				this);
+			short index = -1;
+			if (message != null) {
+                Console.WriteLine(message);
+				while(!Int16.TryParse(message, out index)) {
+					message = server.GetMessageFromPlayer(
+						"Выберите верный номер карты", this);
+				}
+            }
 
+            Console.WriteLine("{0}, {1}", index, index.GetType());
 			return null;
 		}
 

@@ -69,12 +69,12 @@ namespace UNOServer.GameObjects {
 				DeckCards.Cards.RemoveAt(0);
 			}
 
-			Players.ForEach(player => server.TargetMessage(PrepareCardsToSend(player), player));
+			//Players.ForEach(player => server.TargetMessage(PrepareCardsToSend(player), player));
 		}
 
 		private string PrepareCardsToSend(Player player) {
 			var stringCards = new StringBuilder();
-			stringCards.Append("cards:");
+			stringCards.Append("cards^");
 			stringCards.Append(
 				string.Join(";", player.Cards.Select(card => $"{(int) card.Value},{(int) card.Color}"))
 			);
@@ -98,7 +98,10 @@ namespace UNOServer.GameObjects {
 				DeclaredColor = ThrowCards.First().Color
 			};
 
-			server.BroadcastMessage($"text:Первая карта {currentTurn.Card.DisplayValue}.");
+			server.BroadcastMessage($"text^Первая карта {currentTurn.Card.DisplayValue}.");
+
+			var currentPlayer = Players[i];
+			currentPlayer.PlayTurn(DeckCards, currentTurn, server);
 		}
 
 	}//end Game
