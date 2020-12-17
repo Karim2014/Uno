@@ -100,7 +100,7 @@ namespace UNOServer {
 		/// <summary>
 		/// Разыграна дика карта "Возьми 4"
 		/// </summary>
-		WildDarwFour,
+		WildDrawFour,
 		/// <summary>
 		/// Разыграна карта смены направления
 		/// </summary>

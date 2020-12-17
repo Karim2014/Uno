@@ -19,6 +19,11 @@ namespace UNOServer.ServerObjects {
             tcpListener = listener;
         }
 
+        protected internal void Play() {
+            game = new Game(clients.Select(client => client.Player).ToList(), this);
+            game.PlayGame();
+        }
+
         protected internal void AddConnection(ClientObject clientObject) {
             clients.Add(clientObject);
         }
@@ -29,29 +34,21 @@ namespace UNOServer.ServerObjects {
         }
 
         internal void BroadcastMessage(string message, string id) {
-            throw new NotImplementedException();
-        }
-
-        protected internal void Play() {
-            game = new Game(clients.Select(client => client.Player).ToList(), this);
-            game.PlayGame();
-        }
-
-        protected internal void RemoveConnection(string id) {
-            // получаем по id закрытое подключение
-            ClientObject client = clients.FirstOrDefault(c => c.Id == id);
-            // и удаляем его из списка подключений
-            if (client != null)
-                clients.Remove(client);
+            for (int i = 0; i < clients.Count; i++) {
+                if (clients[i].Id != id) // если id клиента не равно id отправляющего
+                {
+                    TargetMessage(message, clients[i]);
+                }
+            }
         }
 
         protected internal string GetMessageFromPlayer(string message, Player player) {
-            ClientObject client = clients.FirstOrDefault(cl => cl.Player == player);
+            ClientObject client = clients.FirstOrDefault(cl => cl.Id == player.Id);
             if (client != null) {
                 TargetMessage("cmd^" + message, client);
                 return client.GetMessage();
             }
-            return null;
+            return "";
         }
 
         protected internal void TargetMessage(string message, ClientObject client) {
@@ -61,9 +58,17 @@ namespace UNOServer.ServerObjects {
             }
         }
 
-        internal void TargetMessage(string message, Player player) {
-            ClientObject client = clients.FirstOrDefault(cl => cl.Player == player);
+        protected internal void TargetMessage(string message, Player player) {
+            ClientObject client = clients.FirstOrDefault(cl => cl.Player.Id == player.Id);
             TargetMessage(message, client);
+        }
+
+        protected internal void RemoveConnection(string id) {
+            // получаем по id закрытое подключение
+            ClientObject client = clients.FirstOrDefault(c => c.Id == id);
+            // и удаляем его из списка подключений
+            if (client != null)
+                clients.Remove(client);
         }
 
         // отключение всех клиентов

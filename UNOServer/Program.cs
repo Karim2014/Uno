@@ -17,7 +17,7 @@ namespace UNOServer {
        
         static bool started = false;
 
-        static void Main(string[] args) {           
+        static void Main(string[] args) {
             try {
                 tcpListener = new TcpListener(IPAddress.Any, 8888);
                 tcpListener.Start();
