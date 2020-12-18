@@ -64,7 +64,9 @@ namespace UNOServer.GameObjects {
 			ThrowCards.Add(DeckCards.Cards.First());
 			DeckCards.Cards.RemoveAt(0);
 
-			while (ThrowCards.First().Value == CardValue.Wild || ThrowCards.First().Value == CardValue.DrawFour) {
+			while (ThrowCards.First().Value == CardValue.Wild || ThrowCards.First().Value == CardValue.DrawFour 
+				|| ThrowCards.First().Value == CardValue.DrawTwo || ThrowCards.First().Value == CardValue.Skip
+				|| ThrowCards.First().Value == CardValue.Reverse) {
 				ThrowCards.Insert(0, DeckCards.Cards.First());
 				DeckCards.Cards.RemoveAt(0);
 			}
@@ -105,11 +107,13 @@ namespace UNOServer.GameObjects {
 				DeclaredColor = ThrowCards.First().Color
 			};
 
+			server.BroadcastMessage("Игра началась.");
 			server.BroadcastMessage($"Первая карта {currentTurn.Card.DisplayValue}.");
 
 			while (!Players.Any(pl => !pl.Cards.Any())) {
 				
 				var currentPlayer = Players[i];
+
 				currentTurn = currentPlayer.PlayTurn(DeckCards, currentTurn, server);
 
 				AddToThrowDeck(currentTurn);
@@ -118,10 +122,10 @@ namespace UNOServer.GameObjects {
 					isAscending = !isAscending;
 
 				if (isAscending) {
-					if (i++ > Players.Count)
+					if (++i >= Players.Count)
 						i = 0;
 				} else
-					if (i-- < 0)
+					if (++i <= 0)
 						i = Players.Count - 1;
             }
 

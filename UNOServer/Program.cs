@@ -38,6 +38,7 @@ namespace UNOServer {
                 //    started = message == "start";
                 //}
                 Console.ReadLine();
+                started = true;
                 Console.WriteLine("Игра началась");
                 server.Play();
 

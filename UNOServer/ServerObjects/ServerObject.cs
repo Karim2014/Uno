@@ -30,10 +30,12 @@ namespace UNOServer.ServerObjects {
 
         protected internal void BroadcastMessage(string message) {
             byte[] data = Encoding.Unicode.GetBytes(message);
+            Thread.Sleep(100);
             clients.ForEach(client => client.Stream.Write(data, 0, data.Length));
         }
 
         internal void BroadcastMessage(string message, string id) {
+            Thread.Sleep(100);
             for (int i = 0; i < clients.Count; i++) {
                 if (clients[i].Id != id) // если id клиента не равно id отправляющего
                 {
@@ -53,6 +55,7 @@ namespace UNOServer.ServerObjects {
 
         protected internal void TargetMessage(string message, ClientObject client) {
             if (client != null) {
+                Thread.Sleep(100);
                 byte[] data = Encoding.Unicode.GetBytes(message);
                 client.Stream.Write(data, 0, data.Length);
             }

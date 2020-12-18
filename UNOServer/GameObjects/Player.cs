@@ -33,10 +33,6 @@ namespace UNOServer.GameObjects {
 			Name = name;
 		}
 
-		public string ShowCards() {
-			return $"Ваши карты: {string.Join(" ", Cards.Select(с => с.DisplayValue))}";
-		}
-
 		/// <summary>
 		/// Выполняет ход
 		/// </summary>
@@ -45,7 +41,6 @@ namespace UNOServer.GameObjects {
 		public PlayerTurn PlayTurn(CardDeck drawPile, PlayerTurn previousTurn, ServerObject server) {
 			this.server = server;
 			//string message = server.GetMessageFromPlayer("Ваш ход.\n:" + ShowCards(), this);
-			server.TargetMessage("Вы ходите", this);
 
 			PlayerTurn turn = new PlayerTurn();
 			if (previousTurn.Result == TurnResult.Skip
@@ -82,7 +77,7 @@ namespace UNOServer.GameObjects {
 			var drawnCard = cardDeck.Draw(1);
 			// добавляем игроку
 			Cards.AddRange(drawnCard);
-			server.GetMessageFromPlayer($"У вас нет карт, которые можно разыграть. Вам выдана карта из колоды: {drawnCard[0].Value}. \nНажмите Enter для продолжения ", this);
+			server.GetMessageFromPlayer($"У вас нет карт, которые можно разыграть. Вам выдана карта из колоды: {drawnCard[0].DisplayValue}. \nНажмите Enter для продолжения ", this);
 			// если можно походить - предлагаем походить
 			if(HasMatch(prevTurn.Card)) {
 				turn = PlayMatchingCard(prevTurn.Card);
@@ -121,7 +116,7 @@ namespace UNOServer.GameObjects {
 				//server.TargetMessage("Вы взяли и разыграли карту из колоды", this);
 				if (currentTurn.Card.Color == CardColor.Wild) {
 					Console.WriteLine($"{Name} загадал {currentTurn.Card.Color} цвет");
-					server.BroadcastMessage($"{Name} загадал {currentTurn.Card.Color} цвет");
+					server.BroadcastMessage($"{Name} загадал {currentTurn.DeclaredColor} цвет");
 				}
 				if (currentTurn.Card.Value == CardValue.Reverse) {
 					Console.WriteLine($"{Name} изменил направление");
@@ -165,17 +160,27 @@ namespace UNOServer.GameObjects {
 		}
 
 		private short RequestCardNumber() {
-			string message = server.GetMessageFromPlayer("Выберите карту:\n" + ShowCards(), this);
+			string message = server.GetMessageFromPlayer("Ваши карты. Выберите и введите номер\n" + ShowCards(), this);
 
-			short index = -1;
-			Console.WriteLine("Player: " + message);
-			while (!Int16.TryParse(message, out index) && index < Cards.Count) {
-				message = server.GetMessageFromPlayer(
-					"Выберите верный номер карты", this);
-			}
+            Console.WriteLine("Player: " + message);
 
-			return index;
+            short index;
+            while (!Int16.TryParse(message, out index) && index < Cards.Count && index > 0) {
+                message = server.GetMessageFromPlayer(
+                    "Выберите верный номер карты", this);
+            }
+
+            return (short) (index - 1);
         }
+
+		public string ShowCards() {
+			string message = "";
+			int index = 1;
+			Cards.ForEach(card => {
+				message += $"{index++}: {card.DisplayValue}\n";
+			});
+			return message;
+		}
 
 		private short RequestCardColor() {
 			short index = -1;
@@ -187,10 +192,14 @@ namespace UNOServer.GameObjects {
 				Console.WriteLine($"{Name}: " + message);
 			} while (!Int16.TryParse(message, out index) && !Enum.IsDefined(typeof(CardColor), index));
 
-			return index;
+			return (short) (index - 1);
 		}
 
 		private PlayerTurn PlayMatchingCard(List<Card> matching) {
+
+			server.BroadcastMessage($"Ход игрока {Name}", Id);
+			server.TargetMessage($"Ваш ход.", this);
+
 			var turn = new PlayerTurn();
 			turn.Result = TurnResult.PlayedCard;
 			Card turnCard;
@@ -239,6 +248,12 @@ namespace UNOServer.GameObjects {
 				} else {
 					turn.Card = turnCard;
 					turn.DeclaredColor = turnCard.Color;
+					if (turnCard.Value == CardValue.DrawTwo) {
+						turn.Result = TurnResult.DrawTwo;
+                    } 
+					if(turnCard.Value == CardValue.Skip) {
+						turn.Result = TurnResult.Skip;
+                    }
 					Cards.Remove(turnCard);
 					correct = true;
 				}

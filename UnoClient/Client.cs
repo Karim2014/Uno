@@ -49,6 +49,8 @@ namespace UnoClient {
         }
 
         private void Send(string message) {
+            if (message == "")
+                message = " ";
             byte[] data = Encoding.Unicode.GetBytes(message);
             stream.Write(data, 0, data.Length);
         }
@@ -61,7 +63,7 @@ namespace UnoClient {
                     string[] m = message.Split('^', 2);
                     string head = m[0];
                     string body = m.Length > 1 ? m[1] : m[0];
-                    //Console.WriteLine("Debug: " + message);
+                    Console.WriteLine("Debug: " + message);
                     ProcessMessage(head, body);
                 } catch (Exception e) {
                     Console.WriteLine("Подключение прервано!"); //соединение было прервано
@@ -87,25 +89,20 @@ namespace UnoClient {
         private void ProcessMessage(string head, string body) {
             switch (head) {
                 case "text":
-                    Console.WriteLine(body);
+                    //Console.WriteLine(body);
                     return;
                 case "cards":
-                    Console.WriteLine(body);
+                    //Console.WriteLine(body);
                     return;
                 case "cmd":
-                    Console.WriteLine(body);
+                    //Console.WriteLine(body);
                     string num = Console.ReadLine();
                     Send(num);
                     return;
                 default:
-                    Console.WriteLine(body);
+                    //Console.WriteLine(body);
                     return;
             }
-        }
-
-        ~Client() {
-            Console.Beep();
-            Disconnect();
         }
 
         private void Disconnect() {
