@@ -83,8 +83,15 @@ namespace UNOServer.GameObjects {
 
 		/// 
 		/// <param name="turn"></param>
-		private void AddToDiscardPile(PlayerTurn turn) {
-
+		private void AddToThrowDeck(PlayerTurn currentTurn) {
+			if (currentTurn.Result == TurnResult.PlayedCard
+					|| currentTurn.Result == TurnResult.DrawTwo
+					|| currentTurn.Result == TurnResult.Skip
+					|| currentTurn.Result == TurnResult.WildCard
+					|| currentTurn.Result == TurnResult.WildDrawFour
+					|| currentTurn.Result == TurnResult.Reversed) {
+				ThrowCards.Insert(0, currentTurn.Card);
+			}
 		}
 
 		public void PlayGame() {
@@ -100,8 +107,30 @@ namespace UNOServer.GameObjects {
 
 			server.BroadcastMessage($"Первая карта {currentTurn.Card.DisplayValue}.");
 
-			var currentPlayer = Players[i];
-			currentPlayer.PlayTurn(DeckCards, currentTurn, server);
+			while (!Players.Any(pl => !pl.Cards.Any())) {
+				
+				var currentPlayer = Players[i];
+				currentTurn = currentPlayer.PlayTurn(DeckCards, currentTurn, server);
+
+				AddToThrowDeck(currentTurn);
+
+				if (currentTurn.Result == TurnResult.Reversed)
+					isAscending = !isAscending;
+
+				if (isAscending) {
+					if (i++ > Players.Count)
+						i = 0;
+				} else
+					if (i-- < 0)
+						i = Players.Count - 1;
+            }
+
+			var winningPlayer = Players.Where(pl => !pl.Cards.Any()).First();
+
+            System.Console.WriteLine($"Игрок {winningPlayer} выиграл!!!");
+
+			System.Console.ReadLine();
+
 		}
 
 	}//end Game
