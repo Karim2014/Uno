@@ -27,9 +27,9 @@ namespace UnoClient {
                 string message = userName;
                 Send(message);
 
-                // запускаем новый поток для получения данных
-                SendThread = new Thread(new ThreadStart(SendMessage));
-                SendThread.Start();
+                // запускаем новый поток для отправки данных
+                //SendThread = new Thread(new ThreadStart(SendMessage));
+                //SendThread.Start();
 
                 Console.WriteLine("Добро пожаловать, {0}", userName);
                 //SendMessage();
@@ -61,7 +61,7 @@ namespace UnoClient {
                     string[] m = message.Split('^', 2);
                     string head = m[0];
                     string body = m.Length > 1 ? m[1] : m[0];
-                    Console.WriteLine(message);
+                    //Console.WriteLine("Debug: " + message);
                     ProcessMessage(head, body);
                 } catch (Exception e) {
                     Console.WriteLine("Подключение прервано!"); //соединение было прервано

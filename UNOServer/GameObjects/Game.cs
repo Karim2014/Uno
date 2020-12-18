@@ -98,7 +98,7 @@ namespace UNOServer.GameObjects {
 				DeclaredColor = ThrowCards.First().Color
 			};
 
-			server.BroadcastMessage($"text^Первая карта {currentTurn.Card.DisplayValue}.");
+			server.BroadcastMessage($"Первая карта {currentTurn.Card.DisplayValue}.");
 
 			var currentPlayer = Players[i];
 			currentPlayer.PlayTurn(DeckCards, currentTurn, server);

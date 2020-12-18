@@ -45,6 +45,7 @@ namespace UNOServer.GameObjects {
 		public PlayerTurn PlayTurn(CardDeck drawPile, PlayerTurn previousTurn, ServerObject server) {
 			this.server = server;
 			//string message = server.GetMessageFromPlayer("Ваш ход.\n:" + ShowCards(), this);
+			server.TargetMessage("Вы ходите", this);
 
 			PlayerTurn turn = new PlayerTurn();
 			if (previousTurn.Result == TurnResult.Skip
@@ -62,10 +63,10 @@ namespace UNOServer.GameObjects {
 			} else if (HasMatch(previousTurn.Card)) {
 				// если у нас есть карта, которой мы можем походить и предыдущий резльтат был обычным
 				// то обрабатываем как обычный ход
-				PlayMatchingCard(previousTurn.Card);
+				turn = PlayMatchingCard(previousTurn.Card);
             } else {
 				//уведомляем игрока, что о берет карты.
-				DrawCard(previousTurn, drawPile);
+				turn = DrawCard(previousTurn, drawPile);
 			}
 
 			DisplayTurn(turn);
@@ -204,22 +205,25 @@ namespace UNOServer.GameObjects {
 					turnCard = Cards[RequestCardNumber()];
 				}
 				// если это карта возьми четыре и она единственная, которой можно походить - ходим
-				if(turnCard.Value == CardValue.DrawFour && (matching.All(x => x.Value == CardValue.DrawFour))) {
-					// записываем карту в рузльтат
-					turn.Card = turnCard;
-					// цвет карты запрашиваем у игрока
-					turn.DeclaredColor = (CardColor)RequestCardColor();
-					// результат - дикая карта
-					turn.Result = TurnResult.WildDrawFour;
-					// убираем эту карту из списка карт игрока
-					Cards.Remove(turnCard);
-					// выходим из цикла
-					correct = true;
-				} else {
-					Console.WriteLine(Name + ": Эта карта может быть разыграна только когда у вас нет других карт, которые можно разыграть");
-					server.TargetMessage("Эта карта может быть разыграна только когда у вас нет других карт, которые можно разыграть", this);
-					continue;
-				}
+				if (turnCard.Value == CardValue.DrawFour)
+					if (matching.All(x => x.Value == CardValue.DrawFour)) {
+						
+						// записываем карту в рузльтат
+						turn.Card = turnCard;
+						// цвет карты запрашиваем у игрока
+						turn.DeclaredColor = (CardColor) RequestCardColor();
+						// результат - дикая карта
+						turn.Result = TurnResult.WildDrawFour;
+						// убираем эту карту из списка карт игрока
+						Cards.Remove(turnCard);
+						// выходим из цикла
+						correct = true;
+					} else {
+						Console.WriteLine(Name + ": Эта карта может быть разыграна только когда у вас нет других карт, которые можно разыграть");
+						server.TargetMessage("Эта карта может быть разыграна только когда у вас нет других карт, которые можно разыграть", this);
+						continue;
+					}
+
 				// если разыгранная карта - дикая
 				if(turnCard.Value == CardValue.Wild) {
 					// записываем карту в результат
