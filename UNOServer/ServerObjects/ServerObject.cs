@@ -16,6 +16,8 @@ namespace UNOServer.ServerObjects {
         List<ClientObject> clients = new List<ClientObject>(); // все подключения
         Game game;
 
+        public int ClientsCount { get { return clients.Count; } private set { } }
+
         public ServerObject(TcpListener listener) {
             tcpListener = listener;
         }

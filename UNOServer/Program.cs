@@ -25,11 +25,10 @@ namespace UNOServer {
  
                 server = new ServerObject(tcpListener);
 
-                //TcpClient tcpClient = tcpListener.AcceptTcpClient();
-                //mainClient = new ClientObject(tcpClient, server);
+                TcpClient tcpClient = tcpListener.AcceptTcpClient();
+                mainClient = new ClientObject(tcpClient, server);
 
-                //Console.WriteLine($"Подключен раздающий игрок: {mainClient.Player.Name}");
-                //mainClient.Player = new GameObjects.Player(message);
+                Console.WriteLine($"Подключен раздающий игрок: {mainClient.Player.Name}");
 
                 new Thread(new ThreadStart(Listen)).Start();
 
@@ -37,8 +36,11 @@ namespace UNOServer {
                 //    string message = RecieveMessage(mainClient.Stream);
                 //    started = message == "start";
                 //}
-                Console.ReadLine();
-                started = true;
+                server.GetMessageFromPlayer("Вы - раздающий игрок! Нажмите Enter, когда необходимо начать игру", mainClient.Player);
+                while (!(started = (server.ClientsCount > 1 && server.ClientsCount < 9))) {
+                    mainClient.SendMessage($"Игра не может быть начата. Количество людей должно быть от 2 до 8 (Сейчас: {server.ClientsCount})");
+                    server.GetMessageFromPlayer("", mainClient.Player);
+                }
                 Console.WriteLine("Игра началась");
                 server.Play();
 
@@ -55,8 +57,6 @@ namespace UNOServer {
                 var tcpClient = tcpListener.AcceptTcpClient();  
                 if (!started) {
                     var client = new ClientObject(tcpClient, server);
-                    //Thread clientThread = new Thread(new ThreadStart(client.Process));
-                    //clientThread.Start();
                 }
             }
         }
