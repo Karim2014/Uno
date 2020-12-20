@@ -46,10 +46,6 @@ namespace UNOServer.GameObjects {
 
 			DeckCards.Shuffle();
 
-            for (int i = 0; i < players.Count; i++) {
-				Players[i].Position = i;
-            }
-
 			int maxCards = 7 * Players.Count;
 			int dealtCards = 0;
 
@@ -101,13 +97,20 @@ namespace UNOServer.GameObjects {
 			int i = 0;
 			bool isAscending = true;
 
+			
+
 			PlayerTurn currentTurn = new PlayerTurn() {
 				Result = TurnResult.GameStart,
 				Card = ThrowCards.First(),
 				DeclaredColor = ThrowCards.First().Color
 			};
 
-			server.BroadcastMessage("Игра началась.");
+			server.BroadcastMessage("Игра началась. Вам выданы карты");
+
+			Players.ForEach(pl => {
+				server.TargetMessage(pl.ShowCards(), pl);
+			});
+
 			server.BroadcastMessage($"Первая карта {currentTurn.Card.DisplayValue}.");
 
 			while (!Players.Any(pl => !pl.Cards.Any())) {

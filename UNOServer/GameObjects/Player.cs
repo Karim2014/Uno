@@ -145,8 +145,9 @@ namespace UNOServer.GameObjects {
 			} else if (currentDiscard.Value == CardValue.DrawTwo) {
 				Console.WriteLine("Игрок " + Name + " берет две карты и пропускает ход");
 				server.BroadcastMessage("Игрок " + Name + " берет две карты и пропускает ход", this);
-				server.TargetMessage("Вы берете две карты и пропускаете ход!", this);
 				Cards.AddRange(cardDeck.Draw(2));
+				server.TargetMessage("Вы берете две карты и пропускаете ход!", this);
+				server.TargetMessage("Ваш новый список карт " + ShowCards(), this);
 
 			} else if (currentDiscard.Value == CardValue.DrawFour) {
 				Console.WriteLine("Игрок " + Name + " должен взять четыре карты и пропустить ход");
