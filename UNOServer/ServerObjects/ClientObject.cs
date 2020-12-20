@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using UNOServer.GameObjects;
@@ -14,6 +15,9 @@ namespace UNOServer.ServerObjects {
         private TcpClient client;
         private ServerObject server;
 
+        private BinaryReader reader;
+        private BinaryWriter writer;
+
         public ClientObject(TcpClient tcpClient) {
             Id = Guid.NewGuid().ToString();
             client = tcpClient;
@@ -25,19 +29,20 @@ namespace UNOServer.ServerObjects {
             server = serverObject;
             serverObject.AddConnection(this);
             Stream = client.GetStream();
+            reader = new BinaryReader(Stream);
+            writer = new BinaryWriter(Stream);
 
             // получаем имя пользователя
             string message = GetMessage();
             Player = new Player(message) { Id = Id };
             message = Player.Name + " подключился к игре";
             // посылаем сообщение о входе в чат всем подключенным пользователям
-            server.BroadcastMessage(message, this.Id);
+            server.BroadcastMessage(message, Player);
             Console.WriteLine(message);
         }
 
         public void Process() {
             try {
-
 
                 string message;
                 
@@ -66,16 +71,12 @@ namespace UNOServer.ServerObjects {
 
         // чтение входящего сообщения и преобразование в строку
         public string GetMessage() {
-            byte[] data = new byte[64]; // буфер для получаемых данных
-            StringBuilder builder = new StringBuilder();
-            int bytes = 0;
-            do {
-                bytes = Stream.Read(data, 0, data.Length);
-                builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-            }
-            while (Stream.DataAvailable);
+            return reader.ReadString();
+        }
 
-            return builder.ToString();
+        public void SendMessage(string message) {
+            writer.Write(message);
+            writer.Flush();
         }
 
         // закрытие подключения
@@ -84,6 +85,10 @@ namespace UNOServer.ServerObjects {
                 Stream.Close();
             if (client != null)
                 client.Close();
+            if (reader != null)
+                reader.Close();
+            if (writer != null)
+                writer.Close();
         }
 
     }

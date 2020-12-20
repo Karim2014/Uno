@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -29,19 +30,14 @@ namespace UNOServer.ServerObjects {
         }
 
         protected internal void BroadcastMessage(string message) {
-            byte[] data = Encoding.Unicode.GetBytes(message);
-            Thread.Sleep(100);
-            clients.ForEach(client => client.Stream.Write(data, 0, data.Length));
+            clients.ForEach(client => client.SendMessage(message));
         }
 
-        internal void BroadcastMessage(string message, string id) {
-            Thread.Sleep(100);
-            for (int i = 0; i < clients.Count; i++) {
-                if (clients[i].Id != id) // если id клиента не равно id отправляющего
-                {
-                    TargetMessage(message, clients[i]);
-                }
-            }
+        internal void BroadcastMessage(string message, Player exceptPlayer) {
+            clients
+                .Where(client => client.Id != exceptPlayer.Id)
+                .ToList()
+                .ForEach(client => client.SendMessage(message));
         }
 
         protected internal string GetMessageFromPlayer(string message, Player player) {
@@ -55,9 +51,7 @@ namespace UNOServer.ServerObjects {
 
         protected internal void TargetMessage(string message, ClientObject client) {
             if (client != null) {
-                Thread.Sleep(100);
-                byte[] data = Encoding.Unicode.GetBytes(message);
-                client.Stream.Write(data, 0, data.Length);
+                client.SendMessage(message);
             }
         }
 

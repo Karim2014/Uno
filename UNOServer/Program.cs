@@ -44,6 +44,7 @@ namespace UNOServer {
 
             } catch (Exception ex) {
                 Console.WriteLine("Подключение прервано!"); //соединение было прервано
+                Console.WriteLine(ex.Message);
                 Console.ReadLine();
                 Disconnect();
             }

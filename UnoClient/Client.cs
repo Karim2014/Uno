@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -14,7 +15,8 @@ namespace UnoClient {
         private TcpClient client;
         private NetworkStream stream;
 
-        Thread SendThread;
+        private BinaryReader reader;
+        private BinaryWriter writer;
 
         public Client(string name) {
             userName = name;
@@ -24,12 +26,11 @@ namespace UnoClient {
                 client.Connect(host, port); //подключение клиента
                 stream = client.GetStream(); // получаем поток
 
+                reader = new BinaryReader(stream);
+                writer = new BinaryWriter(stream);
+
                 string message = userName;
                 Send(message);
-
-                // запускаем новый поток для отправки данных
-                //SendThread = new Thread(new ThreadStart(SendMessage));
-                //SendThread.Start();
 
                 Console.WriteLine("Добро пожаловать, {0}", userName);
                 //SendMessage();
@@ -49,10 +50,8 @@ namespace UnoClient {
         }
 
         private void Send(string message) {
-            if (message == "")
-                message = " ";
-            byte[] data = Encoding.Unicode.GetBytes(message);
-            stream.Write(data, 0, data.Length);
+            writer.Write(message);
+            writer.Flush();
         }
 
         // получение сообщений
@@ -75,15 +74,7 @@ namespace UnoClient {
         }
 
         private string GetMessage() {
-            byte[] data = new byte[64]; // буфер для получаемых данных
-            StringBuilder builder = new StringBuilder();
-            do {
-                int bytes = stream.Read(data, 0, data.Length);
-                builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-            }
-            while (stream.DataAvailable);
-
-            return builder.ToString();
+            return reader.ReadString();
         }
 
         private void ProcessMessage(string head, string body) {
@@ -110,6 +101,10 @@ namespace UnoClient {
                 stream.Close();//отключение потока
             if (client != null)
                 client.Close();//отключение клиента
+            if (reader != null)
+                reader.Close();
+            if (writer != null)
+                writer.Close();
             //Environment.Exit(0); //завершение процесса
         }
 

@@ -93,13 +93,13 @@ namespace UNOServer.GameObjects {
 		private void DisplayTurn(PlayerTurn currentTurn) {
 			if (currentTurn.Result == TurnResult.ForceDraw) {
 				Console.WriteLine($"{Name} вынужден взять карту. Он пропускает ход");
-				server.BroadcastMessage($"{Name} вынужден взять карту. Он пропускает ход", Id);
+				server.BroadcastMessage($"{Name} вынужден взять карту. Он пропускает ход", this);
 				server.TargetMessage("Вы взяли карту, но она не может быть разыграна. \nВы пропускаете ход", this);
             }
 
 			if(currentTurn.Result == TurnResult.ForceDrawPlay) {
 				Console.WriteLine($"{Name} вынужден взять и разграть карту из колоды.");
-				server.BroadcastMessage($"{Name} вынужден взять и разыграть карту из колоды. Он пропускает ход", Id);
+				server.BroadcastMessage($"{Name} вынужден взять и разыграть карту из колоды. Он пропускает ход", this);
 				server.TargetMessage("Вы взяли и разыграли карту из колоды", this);
 			}
 
@@ -138,19 +138,19 @@ namespace UNOServer.GameObjects {
 
 			if (currentDiscard.Value == CardValue.Skip) {
 				Console.WriteLine("Игрок " + Name + " пропускает ход");
-				server.BroadcastMessage("Игрок " + Name + " пропускает ход", Id);
+				server.BroadcastMessage("Игрок " + Name + " пропускает ход", this);
 				server.TargetMessage("Вы пропускаете ход", this);
 				return turn;
 
 			} else if (currentDiscard.Value == CardValue.DrawTwo) {
 				Console.WriteLine("Игрок " + Name + " берет две карты и пропускает ход");
-				server.BroadcastMessage("Игрок " + Name + " берет две карты и пропускает ход", Id);
+				server.BroadcastMessage("Игрок " + Name + " берет две карты и пропускает ход", this);
 				server.TargetMessage("Вы берете две карты и пропускаете ход!", this);
 				Cards.AddRange(cardDeck.Draw(2));
 
 			} else if (currentDiscard.Value == CardValue.DrawFour) {
 				Console.WriteLine("Игрок " + Name + " должен взять четыре карты и пропустить ход");
-				server.BroadcastMessage("Игрок " + Name + " должен взять четыре карты и пропустить ход", Id);
+				server.BroadcastMessage("Игрок " + Name + " должен взять четыре карты и пропустить ход", this);
 				server.TargetMessage("Вы берете четыре карты и пропускаете ход!", this);
 				Cards.AddRange(cardDeck.Draw(4));
 
@@ -164,8 +164,8 @@ namespace UNOServer.GameObjects {
 
             Console.WriteLine("Player: " + message);
 
-            short index;
-            while (!Int16.TryParse(message, out index) && index < Cards.Count && index > 0) {
+            short index = -1;
+            while (!Int16.TryParse(message, out index) || !(index > 0 && index <= Cards.Count)) {
                 message = server.GetMessageFromPlayer(
                     "Выберите верный номер карты", this);
             }
@@ -197,7 +197,7 @@ namespace UNOServer.GameObjects {
 
 		private PlayerTurn PlayMatchingCard(List<Card> matching) {
 
-			server.BroadcastMessage($"Ход игрока {Name}", Id);
+			server.BroadcastMessage($"Ход игрока {Name}", this);
 			server.TargetMessage($"Ваш ход.", this);
 
 			var turn = new PlayerTurn();
