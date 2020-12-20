@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "UNOServer": {
+      "commandName": "Project"
+    },
+    "UNO": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\adm-sabitovka\\Documents\\Учеба\\3 семестр 2020\\Объектно-ориентированное программирование\\UNO\\UnoClient\\bin\\Debug\\netcoreapp3.1\\UnoClient.exe"
+    }
+  }
+}
