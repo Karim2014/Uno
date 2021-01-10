@@ -19,9 +19,9 @@ namespace UNOServer {
 
         static void Main(string[] args) {
             try {
-                tcpListener = new TcpListener(IPAddress.Any, 8888);
+                tcpListener = new TcpListener(IPAddress.Parse(Dns.GetHostAddresses(Dns.GetHostName())[0].ToString()), 8888);
                 tcpListener.Start();
-                Console.WriteLine("Сервер запущен. Ожидание подключений...");
+                Console.WriteLine($"Сервер запущен по адресу {Dns.GetHostAddresses(Dns.GetHostName())[0]}. Ожидание подключений...");
  
                 server = new ServerObject(tcpListener);
 

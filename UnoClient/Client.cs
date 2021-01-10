@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -9,7 +10,7 @@ namespace UnoClient {
     class Client {
 
         private string userName;
-        private const string host = "127.0.0.1";
+        //private const string host = "127.0.0.1";
         private const int port = 8888;
 
         private TcpClient client;
@@ -21,9 +22,11 @@ namespace UnoClient {
         public Client(string name) {
             userName = name;
             client = new TcpClient();
+        }
 
+        public bool Connect(IPAddress address) {
             try {
-                client.Connect(host, port); //подключение клиента
+                client.Connect(address, port); //подключение клиента
                 stream = client.GetStream(); // получаем поток
 
                 reader = new BinaryReader(stream);
@@ -33,10 +36,13 @@ namespace UnoClient {
                 Send(message);
 
                 Console.WriteLine("Добро пожаловать, {0}", userName);
-                //SendMessage();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex.Message);
-            } 
+                return false;
+            }
+            return true;
         }
 
         // отправка сообщений
@@ -62,7 +68,7 @@ namespace UnoClient {
                     string[] m = message.Split('^', 2);
                     string head = m[0];
                     string body = m.Length > 1 ? m[1] : m[0];
-                    Console.WriteLine("Debug: " + message);
+                    //Console.WriteLine("Debug: " + message);
                     ProcessMessage(head, body);
                 } catch (Exception e) {
                     Console.WriteLine("Подключение прервано!"); //соединение было прервано
@@ -80,18 +86,18 @@ namespace UnoClient {
         private void ProcessMessage(string head, string body) {
             switch (head) {
                 case "text":
-                    //Console.WriteLine(body);
+                    Console.WriteLine(body);
                     return;
                 case "cards":
-                    //Console.WriteLine(body);
+                    Console.WriteLine(body);
                     return;
                 case "cmd":
-                    //Console.WriteLine(body);
+                    Console.WriteLine(body);
                     string num = Console.ReadLine();
                     Send(num);
                     return;
                 default:
-                    //Console.WriteLine(body);
+                    Console.WriteLine(body);
                     return;
             }
         }
